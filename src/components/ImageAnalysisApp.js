@@ -7,6 +7,7 @@ function MultiImageAccidentAnalysisApp() {
   const [images, setImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [extractedText, setextractedText] = useState(null);
 
   const handleImageUpload = (event) => {
     const newFiles = event.target.files;
@@ -37,6 +38,7 @@ function MultiImageAccidentAnalysisApp() {
   
         // Use fetch to send the POST request
         const response = await fetch("https://chubb-poc-backend.onrender.com/extract-text", {
+        // const response = await fetch("http://localhost:5000/extract-text", {
           method: "POST",
           body: formData,
         });
@@ -49,6 +51,7 @@ function MultiImageAccidentAnalysisApp() {
         // Parse the response JSON
         const data = await response.json();
         const pdfText = data.text;
+        setextractedText(pdfText)
   
         // Update the images state with the extracted text
         setImages((prevImages) => {
@@ -123,7 +126,7 @@ function MultiImageAccidentAnalysisApp() {
           {images.length > 0 && (
             <button
               onClick={analyzeImages}
-              disabled={isLoading}
+              disabled={ !extractedText}
               className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 disabled:opacity-50"
             >
               {isLoading ? "Analyzing..." : "Analyze Images"}
