@@ -1,10 +1,10 @@
 import React from 'react';
-import ImageAnalysisApp from './components/ImageAnalysisApp';
+import MultiImageAccidentAnalysisApp from './components/ImageAnalysisApp';
 
 function App() {
   return (
     <div>
-      <ImageAnalysisApp />
+      <MultiImageAccidentAnalysisApp />
     </div>
   );
 }
