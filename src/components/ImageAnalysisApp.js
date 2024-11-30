@@ -36,7 +36,7 @@ function MultiImageAccidentAnalysisApp() {
         formData.append("claimFile", claimFile);
   
         // Use fetch to send the POST request
-        const response = await fetch("http://localhost:5000/extract-text", {
+        const response = await fetch("https://chubb-poc-backend.onrender.com/extract-text", {
           method: "POST",
           body: formData,
         });
