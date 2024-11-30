@@ -1,38 +1,48 @@
-const express = require('express');
-const multer = require('multer');
-const pdfParse = require('pdf-parse');
-const cors = require('cors'); // Import cors middleware
+const multer = require("multer");
+const pdfParse = require("pdf-parse");
+const cors = require("cors");
 
-const app = express();
-const PORT = 5000;
-
-// Enable CORS
-app.use(cors());
-
-// Set up file upload using multer
+// Create a memory storage instance for multer
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-app.post('/extract-text', upload.single('claimFile'), async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: 'No file uploaded' });
+// Wrapping multer in a promise for serverless compatibility
+const multerMiddleware = (req, res) =>
+  new Promise((resolve, reject) => {
+    upload.single("claimFile")(req, res, (err) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve();
+    });
+  });
+
+export default async function handler(req, res) {
+  // Enable CORS
+  cors()(req, res, () => {});
+
+  if (req.method === "POST") {
+    try {
+      await multerMiddleware(req, res);
+
+      if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+
+      const pdfBuffer = req.file.buffer;
+
+      // Extract text using pdf-parse
+      const data = await pdfParse(pdfBuffer);
+      const fullText = data.text;
+      console.log(fullText);
+
+      res.json({ text: fullText });
+    } catch (error) {
+      console.error("Error extracting text from PDF:", error);
+      res.status(500).json({ error: "Error extracting text from PDF" });
+    }
+  } else {
+    res.setHeader("Allow", ["POST"]);
+    res.status(405).json({ error: `Method ${req.method} Not Allowed` });
   }
-
-  try {
-    const pdfBuffer = req.file.buffer;
-
-    // Extract text using pdf-parse
-    const data = await pdfParse(pdfBuffer);
-    const fullText = data.text;
-    console.log(fullText)
-
-    res.json({ text: fullText });
-  } catch (error) {
-    console.error('Error extracting text from PDF:', error);
-    res.status(500).json({ error: 'Error extracting text from PDF' });
-  }
-});
-
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+}
