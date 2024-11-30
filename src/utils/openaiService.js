@@ -47,13 +47,35 @@ Be precise, objective, and focus on extracting key information that can be used 
       try {
         const base64Image = await getBase64(image.file);
         const claim = image.claimDescription || "No claim description provided";
+        console.log(claim)
+
+        const extractClaimDescriptionPrompt = `
+        You are an AI document processor.
+        Your task is to extract the claim description from the provided PDF text. The claim description should be as detailed and precise as possible, focusing on the key points relevant to insurance claims.
+        
+        Provided PDF text:
+        ${claim}
+        
+        Return only the extracted claim description.
+        `;
+
+         // Step 1: Extract the claim description from the PDF text
+         const extractClaimDescriptionMessages = [
+          new SystemMessage(`You are an AI document processor. Your task is to extract the claim description from the provided PDF text. Return only the extracted claim description.`),
+          new HumanMessage({ content: claim }),
+        ];
+
+        const claimDescriptionResponse = await model.invoke(extractClaimDescriptionMessages);
+        const claimDes = sanitizeResponse(claimDescriptionResponse.content.toString());
+
+        console.log("Extracted Claim Description:", claimDes);
 
         const messages = [
           new SystemMessage(systemPrompt),
           new HumanMessage({
             content: `
-Extract Claim Description from the whole pdf text and use for comparision:
-${claim}
+Extract relevant insurance Claim Description from the whole pdf text and use for comparision:
+${claimDes}
 
 Analyze the following accident scene image:
 ![image](data:image/jpeg;base64,${base64Image})
