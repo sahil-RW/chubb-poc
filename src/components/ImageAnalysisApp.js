@@ -17,10 +17,9 @@ function MultiImageAccidentAnalysisApp() {
         imageUrl: URL.createObjectURL(file),
         claimDescription: null,
         result: "Not analyzed",
-        accidentDetails: "Not analyzed",
-        surroundings: "Not analyzed",
-        condition: "Not analyzed",
-        overallAssesment: "Not analyzed",
+        claimInformation: "Not analyzed",
+        aiInterpretation: "Not analyzed",
+        reason: "Not analyzed",
         analysisStatus: "pending",
       }));
 
@@ -140,12 +139,11 @@ function MultiImageAccidentAnalysisApp() {
               <thead>
                 <tr className="bg-gray-100 text-left">
                   <th className="p-4">Image</th>
-                  <th className="p-4">Claim Description</th>
-                  <th className="p-4">Accident Details</th>
-                  <th className="p-4">Surroundings</th>
-                  <th className="p-4">Condition</th>
-                  <th className="p-4">Overall Assessment</th>
+                  <th className="p-4">Claim Description File</th>
+                  <th className="p-4">Claim Information</th>
+                  <th className="p-4">AI Interpretation</th>
                   <th className="p-4">Result</th>
+                  <th className="p-4">Reason</th>
                   <th className="p-4">Actions</th>
                 </tr>
               </thead>
@@ -170,29 +168,23 @@ function MultiImageAccidentAnalysisApp() {
                     <td className="p-4">
                       {isLoading && image.analysisStatus === "pending"
                         ? "Analyzing..."
-                        : image.accidentDetails}
+                        : image.claimInformation}
                     </td>
                     <td className="p-4">
                       {isLoading && image.analysisStatus === "pending"
                         ? "Analyzing..."
-                        : image.surroundings}
-                    </td>
-                    <td className="p-4">
-                      {isLoading && image.analysisStatus === "pending"
-                        ? "Analyzing..."
-                        : image.condition}
-                    </td>
-                    <td className="p-4">
-                      {isLoading && image.analysisStatus === "pending"
-                        ? "Analyzing..."
-                        : image.overallAssesment}
+                        : image.aiInterpretation}
                     </td>
                     <td className="p-4">
                       {isLoading && image.analysisStatus === "pending"
                         ? "Analyzing..."
                         : image.result}
                     </td>
-                    {/* <td className="p-4">{image.result}</td> */}
+                    <td className="p-4">
+                      {isLoading && image.analysisStatus === "pending"
+                        ? "Analyzing..."
+                        : image.reason}
+                    </td>
                     <td className="p-4">
                       <button
                         onClick={() => removeImage(index)}

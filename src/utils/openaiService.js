@@ -29,15 +29,14 @@ You are an AI document processor and accident scene analyzer.
 Your task is to provide a detailed analysis of the accident scene and extract the claim description from the provided PDF text.
 
 Analysis Requirements:
-1. Accident Details: Identify and describe the specific details of the accident scene, including the nature of the collision, visible damages, and any relevant observations.
-2. Surroundings: Describe the environmental and contextual elements around the accident, such as the location, traffic conditions, and any nearby structures or landmarks.
+1. Claim Description: Extract and provide the claim description from the whole PDF text extracted using OCR. 
+2. AI Interpretation: Identify and describe the specific details of the accident scene, including the nature of the collision, visible damages, and any relevant observations.
 3. Condition: Assess the condition of the vehicles, objects, or individuals involved in the accident, including visible damage and any potential injuries.
-4. Overall Assessment: Provide a comprehensive summary of the incident, including likely causes, severity, and any other significant factors.
-5. Claim Description: Extract and provide the claim description from the whole PDF text extracted using OCR.
-6. Comparison: Compare the details extracted from the accident scene with the claim description from the PDF. 
+4. Comparison: Compare the details extracted from the accident scene with the claim description from the PDF. 
    - If the claim description matches the accident scene details, indicate "Pass".
    - If the claim description does not match the accident scene details, indicate "Fail" and provide specific reasons for the mismatch.
-7. Result: Summarize whether the accident scene matches the claim description (Pass/Fail), and if it fails, outline the reasons for the discrepancy.
+5. Result: Summarize whether the accident scene matches the claim description (Pass/Fail), and if it fails, outline the reasons for the discrepancy.
+6. Reason: Reason for which it is pass or fail
 
 Be precise, objective, and focus on extracting key information that can be used for insurance claim verification. Ensure that the comparison is detailed and that the result is logically derived from the analysis.
 `;
@@ -47,7 +46,6 @@ Be precise, objective, and focus on extracting key information that can be used 
       try {
         const base64Image = await getBase64(image.file);
         const claim = image.claimDescription || "No claim description provided";
-        console.log(claim)
 
         const extractClaimDescriptionPrompt = `
         You are an AI document processor.
@@ -68,8 +66,6 @@ Be precise, objective, and focus on extracting key information that can be used 
         const claimDescriptionResponse = await model.invoke(extractClaimDescriptionMessages);
         const claimDes = sanitizeResponse(claimDescriptionResponse.content.toString());
 
-        console.log("Extracted Claim Description:", claimDes);
-
         const messages = [
           new SystemMessage(systemPrompt),
           new HumanMessage({
@@ -81,12 +77,11 @@ Analyze the following accident scene image:
 ![image](data:image/jpeg;base64,${base64Image})
 
 Provide a one-line summary response with:
-1. Accident Details
-2. Surroundings
-3. Condition
-4. Overall Assessment
-5. Result (Pass/Fail based on acccident details match with claim description match extracted from the pdf text just give one word)
-6. Claim Description
+1. Claim Information
+2. AI Interpretation
+3. Result (Pass/Fail based on acccident details match with claim description match extracted from the pdf text just give one word)
+4. Reason
+5. Done
             `,
           }),
         ];
@@ -94,15 +89,13 @@ Provide a one-line summary response with:
         const analysisResponse = await model.invoke(messages);
         const analysisText = sanitizeResponse(analysisResponse.content.toString());
 
-        console.log(analysisText)
         // Detailed extraction of analysis components
         const extractSection = (sectionName) => {
           const sectionMap = {
-            'Accident Details': /1\.\s*Accident Details:?\s*(?:-\s*)?([\s\S]*?)(?=\n2\.|\n#|\Z)/,
-            'Surroundings': /2\.\s*Surroundings:?\s*([\s\S]*?)(?=\n3\.|\n#|\Z)/,
-            'Condition': /3\.\s*Condition:?\s*([\s\S]*?)(?=\n4\.|\n#|\Z)/,
-            'Overall Assessment': /4\.\s*Overall Assessment:?\s*([\s\S]*?)(?=\n5\.|\n#|\Z)/,
-            'Result': /5\.\s*Result:?\s*([\s\S]*?)(?=\n6\.|\n#|\Z)/
+            'Claim Information': /1\.\s*Claim Information:?\s*(?:-\s*)?([\s\S]*?)(?=\n2\.|\n#|\Z)/,
+            'AI Interpretation': /2\.\s*AI Interpretation:?\s*([\s\S]*?)(?=\n3\.|\n#|\Z)/,
+            'Result': /3\.\s*Result:?\s*([\s\S]*?)(?=\n4\.|\n#|\Z)/,
+            'Reason': /4\.\s*Reason:?\s*([\s\S]*?)(?=\n5\.|\n#|\Z)/
           };
         
           const regex = sectionMap[sectionName];
@@ -112,32 +105,28 @@ Provide a one-line summary response with:
           return match ? match[1].trim() : "Not analyzed";
         };
 
-        const accidentDetails = extractSection('Accident Details');
-        const surroundings = extractSection('Surroundings');
-        const condition = extractSection('Condition');
-        const overallAssesment = extractSection('Overall Assessment');
+        const claimInformation = extractSection('Claim Information');
+        const aiInterpretation = extractSection('AI Interpretation');
         const result = extractSection('Result');
-        console.log(result)
+        const reason = extractSection('Reason');
 
         return {
           ...image,
           analysisStatus: "completed",
-          accidentDetails,
-          surroundings,
-          condition,
-          overallAssesment,
-          result
+          claimInformation,
+          aiInterpretation,
+          result,
+          reason
         };
       } catch (error) {
         console.error("Error analyzing image and claim:", error);
         return {
           ...image,
           analysisStatus: "error",
-          accidentDetails: "Analysis Error",
-          surroundings: "Analysis Error",
-          condition: "Analysis Error",
-          overallAssesment: "Analysis Error",
-          result: "Analysis Error"
+          claimInformation: "Analysis Error",
+          aiInterpretation: "Analysis Error",
+          result: "Analysis Error",
+          reason: "Analysis Error"
         };
       }
     })
