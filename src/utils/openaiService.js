@@ -1,4 +1,6 @@
 
+
+
 import { ChatOpenAI } from "@langchain/openai";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 
@@ -20,7 +22,7 @@ const sanitizeResponse = (text) => {
 
 const claimInfoVariants = [
   "While driving on the main road, a truck traveling with high speed suddenly hit the left side of my car. This has damaged my left rear view mirror, headlight, side door, wheel area and internal components.",
-  "I was driving on a normal road when I suddenly hit a deep pothole. The impact was so strong that it damaged the entire rear side of my car. The bumper is completely cracked, the paint is chipped off, and there's a huge dent on the door.",
+  "I was driving on a road when I suddenly hit a deep pothole. The impact was so strong that it damaged the entire rear side of my car. The bumper is completely cracked, the paint is chipped off, and there's a huge dent on the door.",
   "While I was driving in my street, I hit a pole and it has damaged my front bumper, headlight and hood.",
 ];
 
@@ -139,7 +141,7 @@ export const analyzeMultipleImagesAndClaims = async (images) => {
                         ...image,
                         analysisStatus: "completed",
                         claimInformation: claimDesc,
-                        aiInterpretation: reasoning,
+                        aiInterpretation: imageInterpretation,
                         result: finalResp.toLowerCase().includes('pass') ? 'Pass': 'Fail',
                         reason: finalResp.split('Reasoning:')[1].split('Final Verdict')[0].trim(),
                       };

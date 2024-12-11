@@ -232,13 +232,19 @@ function MultiImageAccidentAnalysisApp() {
             <Upload size={20} /> Upload Images
           </button>
           {images.length > 0 && (
-            <button
-              onClick={analyzeImages}
-              className="flex items-center gap-2 bg-[#A62581] text-white rounded-3xl px-8 py-2 hover:scale-[110%] transition-transform"
-            >
-              {isLoading ? "Analyzing..." : "Analyze Images"}
-            </button>
-          )}
+  <button
+    onClick={analyzeImages}
+    disabled={!images.every((image) => image.claimDescription)}
+    className={`flex items-center gap-2 px-8 py-2 rounded-3xl transition-transform ${
+      images.every((image) => image.claimDescription)
+        ? "bg-[#A62581] text-white hover:scale-[110%]"
+        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+    }`}
+  >
+    {isLoading ? "Analyzing..." : "Analyze Images"}
+  </button>
+)}
+
         </div>
 
         {isLoading && (
